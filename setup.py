@@ -1,5 +1,18 @@
+import sys
 import setuptools
 import SwSpotify
+from setuptools import setup
+from setuptools.command.install import install
+from subprocess import check_call
+
+class PostInstallCommand(install):
+    """Post-installation for bridge"""
+    def run(self):
+        if sys.platform.startswith("win"):
+            check_call([".\\bridge\\install_host.bat"])
+        else:
+            check_call(["sh", "./bridge/install_host.sh"])
+        install.run(self)
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -16,6 +29,9 @@ setuptools.setup(
     packages=['SwSpotify'],
     install_requires=['pywin32; platform_system=="Windows"',
                       'pyobjc; platform_system=="Darwin"'],
+    cmdclass={
+        'install': PostInstallCommand,
+    },
     extras_require={
         'dev': [
             'mock',
